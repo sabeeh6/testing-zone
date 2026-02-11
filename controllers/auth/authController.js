@@ -1,8 +1,8 @@
-import logger from "../config/logger.js"
-import { userModel } from "../model/user.js"
+import logger from "../../config/logger.js"
+import { userModel } from "../../model/user.js"
 import bcrypt from 'bcrypt'
+import { setCookies } from "../../utils/cookie.js"
 import { accessToken } from "./authService.js"
-import { setCookies } from "../utils/cookie.js"
 
 
 export const signUpUser = async(req,res) => {
