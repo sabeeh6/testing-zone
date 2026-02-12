@@ -1,11 +1,16 @@
+import { featureModel } from "../model/feature.js";
 import { testCaseModel } from "../model/testCase.js";
 
 
 
 export const createTestCase = async(req,res)=>{
     try {
-        const{featureId , testId , description , status , actualResult , expectedResult , testType}=req.body
+        const{ featureId , testId , description , status , actualResult , expectedResult , testType}=req.body
+        const id= await featureModel.findById(featureId)
+        console.log("ProjectId" , id.projectId);
+        
         const newTest = new testCaseModel({
+            projectId:id.projectId,
             featureId,
             testId,
             description,
@@ -69,6 +74,26 @@ export const getTestCasesByFeatureId = async(req,res)=>{
     } catch (error) {
         console.log("Error" ,error);
         logger.error("Error" ,error);
+        return res.status(500).json({success:false , message:"Internal server error"})
+    }
+}
+
+export const delTestCase = async(req,res)=>{
+    try {
+        const{id}=req.params
+        const exist = await testCaseModel.findById(id)
+        if (!exist) {
+            return res.status(404).json({success:false , message:"Test case not found"})
+        }
+        await testCaseModel.findByIdAndDelete(id)
+        return res.status(200).json({
+            success:true,
+            message:"Test case deleted successfully",
+        })
+
+    } catch (error) {
+        console.log("Eroor" , error);
+        logger.error("Error" , error)
         return res.status(500).json({success:false , message:"Internal server error"})
     }
 }

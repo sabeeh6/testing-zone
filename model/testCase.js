@@ -5,6 +5,10 @@ const testCaseSchema = new mongoose.Schema({
         type:mongoose.Schema.Types.ObjectId,
         ref:'feature'
     },
+    projectId:{
+        type:mongoose.Schema.Types.ObjectId,
+        ref:"project"
+    },
     testId:{
         type:String
     },  
