@@ -8,11 +8,17 @@ const projectSchema = new mongoose.Schema({
     description:{
         type:String
     },
-    // status:{
-    //     type:String,
-    //     enum:['active'],
-    //     default:'active'
-    // },
+    developers:{
+        type:[String]
+    },
+    testers:{
+        type:[String]
+    },
+    status:{
+        type:String,
+        enum:['active' , 'inReview' , 'completed' , 'pending' , 'blocked'],
+        default:'pending'
+    },
     createdBy:{
         type:mongoose.Schema.Types.ObjectId,
         ref:'user'
