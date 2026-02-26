@@ -44,20 +44,21 @@ export const signInUser = async (req, res) => {
     try {
         const { email, password } = req.body
         const userExist = await userModel.findOne({ email })
+        console.log("USER" , userExist);
+        
         if (!userExist) {
-            return res.status(404), json({ success: false, message: "Invalid credentials" })
+            return res.status(404).json({ success: false, message: "Invalid credentials" })
         }
-
+        
         const pass = await bcrypt.compare(password, userExist.password)
         if (!pass) {
-            return res.status(404).json({ success: false, message: "Invalid credentials" })
+            return res.status(404).json({ success: false, message: "Invalid credential" })
         }
         console.log(userExist._id, userExist.role, userExist.email);
 
         const token = accessToken(userExist)
-        console.log("Token", token);
+        console.log("Login Token", token);
         const cookie = setCookies(res, token)
-        console.log("Cookies", cookie);
 
         const { password: _, ...userData } = userExist.toObject()
         return res.status(200).json({

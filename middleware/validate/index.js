@@ -5,7 +5,7 @@ export const validationRequest =(schema) => (req,res,next)=>{
     try {
         const result = schema.safeParseAsync(req.body)
         if (!result.success) {
-            console.log("❌ Validation failed:", result.error.issues);
+            // console.log("❌ Validation failed:", result.error.issues);
             const error = result.error.issues.map((err)=>({
                 field:err.path.join('.'),
                 message:err.message,

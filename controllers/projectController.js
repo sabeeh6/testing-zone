@@ -34,12 +34,10 @@ export const createProject = async (req, res) => {
 
 export const updateProject = async (req, res) => {
     try {
-        console.log("Body" , req.body);
         
         // const {name , description } = req.body
         const id = req.params.id || req.body.id
         const exist = await projectModel.findById(id)
-        console.log("Project", exist);
         if (!exist) {
             return res.status(404).json({ success: false, message: "Project not found" })
         }
@@ -95,7 +93,6 @@ export const deleteProject = async (req, res) => {
 export const getAllProjects = async (req, res) => {
     try {
         const projects = await projectModel.find()
-        console.log("All Projects", projects);
         if (!projects) {
             return res.status(404).json({ success: false, message: "Projects not found" })
         }

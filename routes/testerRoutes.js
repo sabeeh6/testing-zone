@@ -24,3 +24,7 @@ testerRoutes.post('/create-testCase', createTestCase)
 testerRoutes.put('/update-testCase', updateTestCase)
 testerRoutes.get("/get-testCases-by-featureId/:id", getTestCasesByFeatureId)
 testerRoutes.delete("/delete-testcase/:id", delTestCase)
+
+
+// evidence routes
+

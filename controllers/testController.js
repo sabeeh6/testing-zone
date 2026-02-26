@@ -7,7 +7,6 @@ export const createTestCase = async(req,res)=>{
     try {
         const{ featureId , testId , description , status , actualResult , expectedResult , testType}=req.body
         const id= await featureModel.findById(featureId)
-        console.log("ProjectId" , id.projectId);
         
         const newTest = new testCaseModel({
             projectId:id.projectId,
@@ -30,7 +29,7 @@ export const createTestCase = async(req,res)=>{
 
     } catch (error) {
         console.log("Error" , error);
-        logger.error("Error" , error)
+        // logger.error("Error" , error)
         return res.status(500).json({success:false , message:"Internal server error"})
     }
 } 
@@ -53,7 +52,7 @@ export const updateTestCase = async(req,res)=>{
         
     } catch (error) {
         console.log("Error" , error);
-        logger.error("Error" , error);
+        // logger.error("Error" , error);
         return res.status(500).json({success:false , message:"Internal server error"})
     }
 }
@@ -73,7 +72,7 @@ export const getTestCasesByFeatureId = async(req,res)=>{
         
     } catch (error) {
         console.log("Error" ,error);
-        logger.error("Error" ,error);
+        // logger.error("Error" ,error);
         return res.status(500).json({success:false , message:"Internal server error"})
     }
 }
@@ -93,7 +92,7 @@ export const delTestCase = async(req,res)=>{
 
     } catch (error) {
         console.log("Eroor" , error);
-        logger.error("Error" , error)
+        // logger.error("Error" , error)
         return res.status(500).json({success:false , message:"Internal server error"})
     }
 }

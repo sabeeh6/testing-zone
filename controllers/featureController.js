@@ -57,7 +57,6 @@ export const getFeaturesByProjectId  =async(req,res)=>{
     try {
         const{id}=req.params
         const exist = await featureModel.find({projectId:id})
-        // console.log("Get Project Features" , exist);
         if (!exist) {
             return res.status(404).json({success:false , message:"Features not found against this project"})
         }
@@ -82,10 +81,8 @@ export const deleteFeature =async(req,res)=>
          session.startTransaction()
     try {
         const{id}=req.params
-        // console.log("ID" , id);
         
         const exist = await featureModel.findById(id).session(session)
-        // console.log("Feature" ,exist);
         if (!exist) {
             await session.abortTransaction()
             session.endSession()
