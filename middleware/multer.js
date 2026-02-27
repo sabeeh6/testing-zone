@@ -1,36 +1,28 @@
 // middleware/multer.js
 import multer from "multer";
 
-// ─── Allowed MIME types ───────────────────────────────────────────────────────
-const ALLOWED_MIME_TYPES = [
-  "image/jpeg",
-  "image/png",
-  "image/webp",
-  "image/gif",
-  "video/mp4",
-  "video/quicktime",
-  "video/webm",
-  "application/pdf",
-];
+import fs from "fs";
+import path from "path";
 
-const MAX_FILE_SIZE_MB = 50;
-
-// ─── Memory storage — buffer is streamed to Cloudinary in the controller ─────
+// ─── Memory Storage Configuration ───────────────────────────────────────────
 const storage = multer.memoryStorage();
 
-// ─── File filter — reject unsupported MIME types immediately ─────────────────
+// ─── File filter — allowing types supported by controller ─────────────────────
 const fileFilter = (_req, file, cb) => {
-  if (ALLOWED_MIME_TYPES.includes(file.mimetype)) {
+  const allowedTypes = [
+    "image/jpeg", "image/png", "image/gif", "image/webp",
+    "video/mp4", "video/quicktime", "video/x-msvideo",
+    "application/pdf"
+  ];
+
+  if (allowedTypes.includes(file.mimetype)) {
     cb(null, true);
   } else {
-    cb(
-      new Error(
-        `Unsupported file type: ${file.mimetype}. Allowed: images, videos, pdf`
-      ),
-      false
-    );
+    cb(new Error(`Unsupported file type: ${file.mimetype}. Allowed: Images, MP4, PDF.`), false);
   }
 };
+
+const MAX_FILE_SIZE_MB = 50; // Increased limit for videos/PDFs
 
 // ─── Exported upload middleware ───────────────────────────────────────────────
 export const upload = multer({

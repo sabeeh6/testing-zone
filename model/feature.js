@@ -1,33 +1,39 @@
 import mongoose from "mongoose";
 
 const featureSchema = new mongoose.Schema({
-    projectId:{
-        type:mongoose.Schema.Types.ObjectId,
-        ref:'project'
+    projectId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'project',
+        required: true
     },
-    title:{
-        type:String
+    name: {
+        type: String,
+        required: true
     },
-    description:{
-        type:String
+    description: {
+        type: String,
+        required: true
     },
-    priority:{
-        type:String,
-        enum:['low' , 'normal' , 'high'],
-        default:'low'
+    priority: {
+        type: String,
+        enum: ['low', 'medium', 'high'],
+        default: 'low'
     },
-    type:{
-        type:String,
-        enum:['functional' , 'compliance' , 'security' , 'UI'],
-        default:'functional'
+    type: {
+        type: String,
+        required: true
     },
-    status:{
-        type:String,
-        enum:['notDone' ,'inDiscussion' , 'pending' , 'done' ],
-        default:'pending'
+    status: {
+        type: String,
+        enum: ['active', 'inReview', 'completed', 'pending', 'blocked'],
+        default: 'pending'
     },
-},{
-    timestamps:true
+    createdBy: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'user'
+    }
+}, {
+    timestamps: true
 })
 
-export const featureModel= mongoose.model('feature' , featureSchema)
+export const featureModel = mongoose.model('feature', featureSchema)

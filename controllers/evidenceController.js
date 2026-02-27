@@ -1,5 +1,6 @@
 // controllers/evidenceController.js
 import { evidenceModel } from "../model/evidence.js";
+import { userModel } from "../model/user.js";
 import { Cloud } from "../config/cloudinary.js";
 import { Readable } from "stream";
 

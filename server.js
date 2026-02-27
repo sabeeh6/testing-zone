@@ -9,10 +9,14 @@ import { routes } from "./routes/index.js"
 import { errorHandler } from "./middleware/ErrorHandler.js"
 
 const app = express()
-app.use(cors())
+app.use(cors({
+  origin: 'http://localhost:5173', // Vite default port
+  credentials: true
+}))
 app.use(express.json())
 app.use(express.urlencoded({ extended: false }))
 app.use(cookieParser())
+app.use('/uploads', express.static('uploads'))
 Mongo_Db_Connection()
 app.use('/api', routes)
 app.use(errorHandler)   // ✅ global error handler — must be LAST

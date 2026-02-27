@@ -1,14 +1,14 @@
 
 
-export const setCookies = (res,token)=>{
-    const cookiesOptions={
-        httpOnly:true,
+export const setCookies = (res, token) => {
+    const cookiesOptions = {
+        httpOnly: false,
         secure: process.env.NODE_ENV === "production",
-        sameSite:'strict',
-        maxAge: 2*24*60*60*1000,
-        path:'/'
+        sameSite: 'strict',
+        maxAge: 2 * 24 * 60 * 60 * 1000,
+        path: '/'
     }
-    return res.cookie('authToken' , token , cookiesOptions)
+    return res.cookie('authToken', token, cookiesOptions)
 }
 
 export const clearCookies = (res) => {

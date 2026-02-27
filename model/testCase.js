@@ -1,40 +1,59 @@
 import mongoose from "mongoose";
 
 const testCaseSchema = new mongoose.Schema({
-    featureId:{
-        type:mongoose.Schema.Types.ObjectId,
-        ref:'feature'
+    featureId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'feature',
+        required: true
     },
-    projectId:{
-        type:mongoose.Schema.Types.ObjectId,
-        ref:"project"
+    title: {
+        type: String,
+        required: true
     },
-    testId:{
-        type:String
-    },  
-    description:{
-        type:String
-    }, 
+    description: {
+        type: String
+    },
+    steps: {
+        type: [String],
+        default: []
+    },
+    expectedResult: {
+        type: String
+    },
     status: {
         type: String,
-        enum: ['notRun', 'pass', 'fail', 'blocked'],
+        enum: ['notRun', 'passed', 'failed', 'blocked'],
         default: 'notRun'
     },
-    actualResult:{
-        type:String
+    priority: {
+        type: String,
+        enum: ['low', 'medium', 'high', 'critical'],
+        default: 'low'
     },
-    expectedResult:{
-        type:String
+    severity: {
+        type: String,
+        enum: ['low', 'medium', 'high', 'critical'],
+        default: 'low'
     },
-    testType:{
-        type:String,
-        enum:['manual' , 'automation'],
-        default:'manual'
+    preconditions: {
+        type: String
     },
-    createdBy:{
-        type:mongoose.Schema.Types.ObjectId,
-        ref:'user'
+    actualResult: {
+        type: String
+    },
+    assignedTo: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User'
+    },
+    createdBy: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User'
     }
-})
+}, {
+    timestamps: true
+});
 
-export const testCaseModel=mongoose.model('testCase' , testCaseSchema)
+// Adding index on featureId for performance
+testCaseSchema.index({ featureId: 1 });
+
+export const testCaseModel = mongoose.model('testCase', testCaseSchema);
