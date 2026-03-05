@@ -1,7 +1,11 @@
 {
   "version": 2,
   "buildCommand": "npm install",
-  "runtime": "nodejs20.x",
+  "functions": {
+    "api/index.js": {
+      "runtime": "nodejs20.x"
+    }
+  },
   "routes": [
     {
       "src": "/api/(.*)",
