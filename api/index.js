@@ -15,6 +15,7 @@ const allowedOrigins = [
   'http://localhost:5173',
   'http://localhost:3000',
   'http://localhost:5174',
+  'https://testing-zone-frontend.vercel.app',
 ].filter(Boolean)
 
 // Add production frontend URL from environment variable
