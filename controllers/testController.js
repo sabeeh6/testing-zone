@@ -32,7 +32,8 @@ export const createTestCase = async (req, res) => {
             expectedResult,
             status,
             priority,
-            createdBy
+            createdBy,
+            userId: req.user._id
         });
 
         await newTest.save();

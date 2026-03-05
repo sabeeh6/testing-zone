@@ -1,6 +1,10 @@
 import mongoose from "mongoose";
 
 const featureSchema = new mongoose.Schema({
+    userId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User',
+    },
     projectId: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'project',

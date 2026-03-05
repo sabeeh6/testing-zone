@@ -1,6 +1,10 @@
 import mongoose from "mongoose";
 
 const testCaseSchema = new mongoose.Schema({
+    userId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User',
+    },
     featureId: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'feature',

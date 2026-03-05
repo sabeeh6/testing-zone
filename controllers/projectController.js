@@ -8,12 +8,14 @@ import { testCaseModel } from "../model/testCase.js";
 export const createProject = async (req, res) => {
     try {
         const { name, description, status, developers, testers } = req.body
+        console.log("User from Request:", req.user._id);
         const newData = new projectModel({
             name,
             description,
             status,
             developers,
-            testers
+            testers,
+            userId: req.user._id
         })
         await newData.save()
 
@@ -34,7 +36,7 @@ export const createProject = async (req, res) => {
 
 export const updateProject = async (req, res) => {
     try {
-        
+
         // const {name , description } = req.body
         const id = req.params.id || req.body.id
         const exist = await projectModel.findById(id)

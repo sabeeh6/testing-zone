@@ -22,7 +22,8 @@ export const createFeature = async (req, res) => {
             priority,
             type,
             status,
-            createdBy
+            createdBy,
+            userId: req.user._id
         });
 
         await newFeature.save();

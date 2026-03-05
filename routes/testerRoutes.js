@@ -2,9 +2,12 @@ import { Router } from "express";
 import { createProject, deleteProject, getAllProjects, updateProject } from "../controllers/projectController.js";
 import { createFeature, deleteFeature, getFeatureById, getFeaturesByProjectId, updateFeature } from "../controllers/featureController.js";
 import { createTestCase, delTestCase, getTestCaseById, getTestCasesByFeatureId, updateTestCase } from "../controllers/testController.js";
+import { verifyToken } from "../middleware/verifyToken.js";
 
 export const testerRoutes = Router();
 
+// Apply verifyToken middleware to all routes in this router
+testerRoutes.use(verifyToken);
 
 //  Project Routes
 testerRoutes.post('/create-project', createProject)

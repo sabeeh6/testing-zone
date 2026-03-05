@@ -64,6 +64,7 @@ export const createEvidence = async (req, res) => {
     filePublicId: [uploadResult.public_id],
     fileType: [resolveFileType(req.file.mimetype)],
     uploadedBy: req.user._id,
+    userId: req.user._id
   });
 
   return res.status(201).json({ success: true, data: evidence });
