@@ -1,16 +1,8 @@
-import {v2 as cloudinary} from 'cloudinary'
-import dotenv from "dotenv"
-dotenv.config()
+import { cloudinaryManager } from './cloudinaryManager.js';
 
-console.log("Cloud" , process.env.Cloudinary_Key_Name_456);
-if(!process.env.Cloudinary_Key_Name_456 || !process.env.Cloudinary_API_Key_Name_456 || !process.env.Cloudinary_Secret_Key_Name_456){
-    throw new Error("Cloudinary credentials are not set");
-}
+// Re-export the manager's active instance getter
+export const getCloudInstance = async () => {
+    return await cloudinaryManager.getActiveAccountInstance();
+};
 
-cloudinary.config({
-    cloud_name:process.env.Cloudinary_Key_Name_456,
-    api_key:process.env.Cloudinary_API_Key_Name_456,
-    api_secret:process.env.Cloudinary_Secret_Key_Name_456
-})
-
-export const Cloud = cloudinary
+export const Cloud = await getCloudInstance(); // Keep for backward compatibility or initial setup

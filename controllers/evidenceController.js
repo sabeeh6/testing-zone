@@ -1,7 +1,7 @@
-// controllers/evidenceController.js
 import { evidenceModel } from "../model/evidence.js";
 import { userModel } from "../model/user.js";
-import { Cloud } from "../config/cloudinary.js";
+import { Cloud, getCloudInstance } from "../config/cloudinary.js";
+import { cloudinaryManager } from "../config/cloudinaryManager.js";
 import { Readable } from "stream";
 
 // ─── Helper: derive human-readable fileType from mimetype ────────────────────
@@ -21,6 +21,17 @@ const uploadToCloudinary = (buffer, options) =>
     });
     Readable.from(buffer).pipe(uploadStream);
   });
+
+// ─── Helper: fetch Cloudinary storage usage ──────────────────────────────────
+// ─── Helper: fetch Cloudinary storage usage ──────────────────────────────────
+const getCloudinaryUsage = async () => {
+  try {
+    return await cloudinaryManager.getAllUsage();
+  } catch (error) {
+    console.error("Cloudinary Usage Error:", error);
+    return null;
+  }
+};
 
 // ─── Helper: build a unique Cloudinary public_id ─────────────────────────────
 const buildPublicId = (userId, originalname) =>
@@ -50,11 +61,20 @@ export const createEvidence = async (req, res) => {
   const isVideo = req.file.mimetype.startsWith("video/");
   const publicId = buildPublicId(req.user._id, req.file.originalname);
 
+  // ── Get Active Cloudinary Instance (Dynamic Rotation) ───────────────────
+  const activeCloud = await getCloudInstance();
+
   // ── Upload buffer → Cloudinary ──────────────────────────────────────────
-  const uploadResult = await uploadToCloudinary(req.file.buffer, {
-    folder: `evidence/${isVideo ? "videos" : "files"}`,
-    resource_type: isVideo ? "video" : "auto",
-    public_id: publicId,
+  const uploadResult = await new Promise((resolve, reject) => {
+    const uploadStream = activeCloud.uploader.upload_stream({
+      folder: `evidence/${isVideo ? "videos" : "files"}`,
+      resource_type: isVideo ? "video" : "auto",
+      public_id: publicId,
+    }, (error, result) => {
+      if (error) return reject(error);
+      resolve(result);
+    });
+    Readable.from(req.file.buffer).pipe(uploadStream);
   });
 
   // ── Save to MongoDB — schema fields are arrays ──────────────────────────
@@ -63,11 +83,14 @@ export const createEvidence = async (req, res) => {
     fileUrl: [uploadResult.secure_url],
     filePublicId: [uploadResult.public_id],
     fileType: [resolveFileType(req.file.mimetype)],
+    cloudName: activeCloud.config().cloud_name,
     uploadedBy: req.user._id,
     userId: req.user._id
   });
 
-  return res.status(201).json({ success: true, data: evidence });
+  const storageUsage = await getCloudinaryUsage();
+
+  return res.status(201).json({ success: true, data: evidence, storageUsage });
 };
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -89,26 +112,37 @@ export const updateEvidence = async (req, res) => {
     return res.status(404).json({ success: false, message: "Evidence not found." });
   }
 
+  // ── Configure Cloudinary for the specific account stored in DB ───────────
+  const accountConfig = cloudinaryManager.accounts.find(a => a.cloud_name === evidence.cloudName) || cloudinaryManager.accounts[0];
+  const cloudInstance = cloudinaryManager.configureInstance(accountConfig);
+
   // ── Delete old Cloudinary asset ──────────────────────────────────────────
   const oldPublicId = evidence.filePublicId[0];
   const oldFileType = evidence.fileType[0];
   if (oldPublicId) {
-    await Cloud.uploader.destroy(oldPublicId, {
+    await cloudInstance.uploader.destroy(oldPublicId, {
       resource_type: oldFileType === "video" ? "video" : "image",
     });
   }
 
-  // ── Upload new file to Cloudinary ────────────────────────────────────────
+  // ── Upload new file to Cloudinary (Use Active Account for NEW upload) ────
+  const activeCloud = await getCloudInstance();
   const isVideo = req.file.mimetype.startsWith("video/");
   const publicId = buildPublicId(req.user._id, req.file.originalname);
 
-  const uploadResult = await uploadToCloudinary(req.file.buffer, {
-    folder: `evidence/${isVideo ? "videos" : "files"}`,
-    resource_type: isVideo ? "video" : "auto",
-    public_id: publicId,
+  const uploadResult = await new Promise((resolve, reject) => {
+    const uploadStream = activeCloud.uploader.upload_stream({
+      folder: `evidence/${isVideo ? "videos" : "files"}`,
+      resource_type: isVideo ? "video" : "auto",
+      public_id: publicId,
+    }, (error, result) => {
+      if (error) return reject(error);
+      resolve(result);
+    });
+    Readable.from(req.file.buffer).pipe(uploadStream);
   });
 
-  // ── Update first element of each array in MongoDB ───────────────────────
+  // ── Update in MongoDB (including cloudName) ──────────────────────────────
   const updated = await evidenceModel.findByIdAndUpdate(
     req.params.id,
     {
@@ -116,6 +150,7 @@ export const updateEvidence = async (req, res) => {
         "fileUrl.0": uploadResult.secure_url,
         "filePublicId.0": uploadResult.public_id,
         "fileType.0": resolveFileType(req.file.mimetype),
+        "cloudName": activeCloud.config().cloud_name
       },
     },
     { new: true }
@@ -146,6 +181,8 @@ export const getEvidenceByTestCaseId = async (req, res) => {
     evidenceModel.countDocuments({ testCaseId }),
   ]);
 
+  const storageUsage = await getCloudinaryUsage();
+
   return res.status(200).json({
     success: true,
     data: evidenceList,
@@ -155,6 +192,7 @@ export const getEvidenceByTestCaseId = async (req, res) => {
       limit,
       totalPages: Math.ceil(total / limit),
     },
+    storageUsage,
   });
 };
 
@@ -169,10 +207,13 @@ export const deleteEvidence = async (req, res) => {
     return res.status(404).json({ success: false, message: "Evidence not found." });
   }
 
-  // ── Remove all Cloudinary assets stored in the arrays ───────────────────
+  // ── Remove all Cloudinary assets using the stored cloudName ──────────────
+  const accountConfig = cloudinaryManager.accounts.find(a => a.cloud_name === evidence.cloudName) || cloudinaryManager.accounts[0];
+  const cloudInstance = cloudinaryManager.configureInstance(accountConfig);
+
   await Promise.all(
     evidence.filePublicId.map((pid, idx) =>
-      Cloud.uploader.destroy(pid, {
+      cloudInstance.uploader.destroy(pid, {
         resource_type: evidence.fileType[idx] === "video" ? "video" : "image",
       })
     )
