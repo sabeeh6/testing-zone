@@ -22,7 +22,7 @@ const testCaseSchema = new mongoose.Schema({
         default: []
     },
     expectedResult: {
-        type: String
+        type: [String]
     },
     status: {
         type: String,
@@ -40,10 +40,11 @@ const testCaseSchema = new mongoose.Schema({
         default: 'low'
     },
     preconditions: {
-        type: String
+        type: [String]
     },
     actualResult: {
-        type: String
+        type: [String],
+        default: []
     },
     assignedTo: {
         type: mongoose.Schema.Types.ObjectId,

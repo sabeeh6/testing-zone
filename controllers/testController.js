@@ -6,7 +6,20 @@ import logger from "../config/logger.js";
 // CREATE TEST CASE
 export const createTestCase = async (req, res) => {
     try {
-        const { featureId, title, description, steps, expectedResult, status, priority, createdBy } = req.body;
+        const {
+            featureId,
+            title,
+            description,
+            steps,
+            expectedResult,
+            status,
+            priority,
+            severity,
+            preconditions,
+            actualResult,
+            assignedTo,
+            createdBy
+        } = req.body;
 
         if (!featureId || !title) {
             return res.status(400).json({
@@ -32,7 +45,11 @@ export const createTestCase = async (req, res) => {
             expectedResult,
             status,
             priority,
-            createdBy,
+            severity,
+            preconditions,
+            actualResult,
+            assignedTo: assignedTo === "" ? null : assignedTo,
+            createdBy: createdBy === "" ? null : createdBy,
             userId: req.user._id
         });
 
@@ -55,6 +72,11 @@ export const updateTestCase = async (req, res) => {
     try {
         const { id } = req.params;
         const updateData = req.body;
+
+        // Prevent CastError when assignedTo is an empty string
+        if (updateData.hasOwnProperty('assignedTo') && updateData.assignedTo === "") {
+            updateData.assignedTo = null;
+        }
 
         if (!id) {
             return res.status(400).json({
