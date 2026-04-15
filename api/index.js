@@ -52,7 +52,7 @@ if (process.env.NODE_ENV !== 'production') {
 Mongo_Db_Connection()
 
 // API Routes
-app.use('/api', routes)
+app.use('/', routes)
 
 // Global error handler
 app.use(errorHandler)
