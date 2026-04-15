@@ -1,7 +1,7 @@
 import { Router } from "express";
 import { createProject, deleteProject, getAllProjects, updateProject } from "../controllers/projectController.js";
 import { createFeature, deleteFeature, getFeatureById, getFeaturesByProjectId, updateFeature } from "../controllers/featureController.js";
-import { createTestCase, delTestCase, getTestCaseById, getTestCasesByFeatureId, updateTestCase } from "../controllers/testController.js";
+import { createTestCase, delTestCase, getTestCaseById, getTestCasesByFeatureId, updateTestCase, againTest, getExecutionsByTestCaseId, getExecutionById, updateExecution, deleteExecution } from "../controllers/testController.js";
 import { verifyToken } from "../middleware/verifyToken.js";
 
 export const testerRoutes = Router();
@@ -29,6 +29,11 @@ testerRoutes.put('/update-testCase/:id', updateTestCase)
 testerRoutes.get("/get-testCases-by-featureId/:id", getTestCasesByFeatureId)
 testerRoutes.get("/get-testcase/:id", getTestCaseById)
 testerRoutes.delete("/delete-testcase/:id", delTestCase)
+testerRoutes.post("/again-test/:id", againTest)
+testerRoutes.get("/get-executions/:id", getExecutionsByTestCaseId)
+testerRoutes.get("/get-execution/:id", getExecutionById)
+testerRoutes.put("/update-execution/:id", updateExecution)
+testerRoutes.delete("/delete-execution/:id", deleteExecution)
 
 
 // evidence routes

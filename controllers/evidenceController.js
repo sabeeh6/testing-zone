@@ -53,9 +53,9 @@ export const createEvidence = async (req, res) => {
       .json({ success: false, message: "File is required. Send it with field name 'evidence'." });
   }
 
-  const { testCaseId } = req.body;
-  if (!testCaseId) {
-    return res.status(400).json({ success: false, message: "testCaseId is required." });
+  const { testCaseId, testExecutionId } = req.body;
+  if (!testCaseId && !testExecutionId) {
+    return res.status(400).json({ success: false, message: "testCaseId or testExecutionId is required." });
   }
 
   const isVideo = req.file.mimetype.startsWith("video/");
@@ -78,15 +78,19 @@ export const createEvidence = async (req, res) => {
   });
 
   // ── Save to MongoDB — schema fields are arrays ──────────────────────────
-  const evidence = await evidenceModel.create({
-    testCaseId,
+  const evidenceData = {
     fileUrl: [uploadResult.secure_url],
     filePublicId: [uploadResult.public_id],
     fileType: [resolveFileType(req.file.mimetype)],
     cloudName: activeCloud.config().cloud_name,
     uploadedBy: req.user._id,
     userId: req.user._id
-  });
+  };
+
+  if (testCaseId) evidenceData.testCaseId = testCaseId;
+  if (testExecutionId) evidenceData.testExecutionId = testExecutionId;
+
+  const evidence = await evidenceModel.create(evidenceData);
 
   const storageUsage = await getCloudinaryUsage();
 
@@ -166,19 +170,24 @@ export const updateEvidence = async (req, res) => {
 // ─────────────────────────────────────────────────────────────────────────────
 export const getEvidenceByTestCaseId = async (req, res) => {
   const { testCaseId } = req.params;
+  const { isExecution } = req.query; // New flag to distinguish
 
   const page = Math.max(parseInt(req.query.page) || 1, 1);
   const limit = Math.min(parseInt(req.query.limit) || 10, 50);
   const skip = (page - 1) * limit;
 
+  const query = isExecution === 'true' 
+    ? { testExecutionId: testCaseId } 
+    : { testCaseId };
+
   const [evidenceList, total] = await Promise.all([
     evidenceModel
-      .find({ testCaseId })
+      .find(query)
       .sort({ createdAt: -1 })                       // newest first
       .skip(skip)
       .limit(limit)
       .populate("uploadedBy", "name email"),         // attach uploader info
-    evidenceModel.countDocuments({ testCaseId }),
+    evidenceModel.countDocuments(query),
   ]);
 
   const storageUsage = await getCloudinaryUsage();

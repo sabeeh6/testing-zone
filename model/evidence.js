@@ -8,7 +8,12 @@ const evidenceSchema = new mongoose.Schema({
     testCaseId: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'testCase',
-        required: true
+        required: false // Optional if testExecutionId is present
+    },
+    testExecutionId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'testExecution',
+        required: false // Optional if testCaseId is present
     },
     fileUrl: [{
         type: String,
