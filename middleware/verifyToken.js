@@ -5,8 +5,11 @@ dotenv.config();
 
 export const verifyToken = (req, res, next) => {
     try {
-        // Read token from cookie set at login
-        const token = req.cookies?.authToken;
+        // Read token from cookie or Authorization header
+        let token = req.cookies?.authToken;
+        if (!token && req.headers.authorization && req.headers.authorization.startsWith('Bearer ')) {
+            token = req.headers.authorization.split(' ')[1];
+        }
 
         if (!token) {
             return res
