@@ -1,6 +1,6 @@
 import logger from "../../config/logger.js"
 import { userModel } from "../../model/user.js"
-import bcrypt from 'bcrypt'
+import bcrypt from 'bcryptjs'
 import { setCookies, clearCookies } from "../../utils/cookie.js"
 import { accessToken } from "./authService.js"
 
